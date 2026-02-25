@@ -15,12 +15,20 @@ To install with yum/dnf on Fedora, RHEL, CentOS, Amazon Linux etc.
 
 Create a repository file at `/etc/yum.repos.d/noports.repo`:
 
-```ini
+```sh
+sudo tee /etc/yum.repos.d/noports.repo <<EOF
 [noports]
 name=NoPorts Repository
-baseurl=https://rpm.noports.com/$basearch/
+baseurl=https://rpm.noports.com/\$basearch/
 enabled=1
 gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://rpm.noports.com/noports.pub.asc
+EOF
+```
+
+Then install NoPorts:
+
+```sh
+sudo dnf install noports
 ```
