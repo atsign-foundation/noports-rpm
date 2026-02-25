@@ -1,0 +1,43 @@
+name: Update RPM Metadata
+on:
+  push:
+    paths:
+      - 'incoming/**'
+
+jobs:
+  rebuild-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup GPG
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 -d > private.key
+          gpg --import private.key
+          rm private.key
+
+      - name: Organize RPMs
+        working-directory: ./docs
+        run: |
+          sudo apt-get install -y createrepo-c
+          # Define supported architectures
+          ARCHS=("aarch64" "armv7hl" "riscv64" "x86_64")
+          # Move RPMs into architecture-specific folders
+          # Then run createrepo on each arch
+          # Then sign metadata
+          for ARCH in "${ARCHS[@]}"; do
+            mkdir -p $ARCH
+            mv ../incoming/*${ARCH}.rpm ${ARCH}/ || true
+            createrepo_c --update ${ARCH}
+            gpg --detach-sign --armor "${ARCH}/repodata/repomd.xml"
+          done
+
+      - name: Commit and Push
+        run: |
+          git config user.name "Atsign Robot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/.
+          git commit -m "Update repository metadata - gha${{github.run_number}}"
+          git push origin trunk
