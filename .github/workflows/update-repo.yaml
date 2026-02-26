@@ -2,6 +2,7 @@ name: Update RPM Metadata
 on:
   repository_dispatch:
     types: [new-release]
+  workflow-dispatch:
 
 permissions: # added using https://github.com/step-security/secure-repo
   contents: read
@@ -43,7 +44,7 @@ jobs:
             mkdir -p $ARCH
             mv ../incoming/*${ARCH}.rpm ${ARCH}/ || true
             createrepo_c --update ${ARCH}
-            gpg --detach-sign --armor "${ARCH}/repodata/repomd.xml"
+            gpg --detach-sign --armor --batch --yes "${ARCH}/repodata/repomd.xml"
           done
 
       - name: Commit and Push
