@@ -1,8 +1,8 @@
 name: Update RPM Metadata
 on:
+  workflow_dispatch:
   repository_dispatch:
     types: [new-release]
-  workflow-dispatch:
 
 permissions: # added using https://github.com/step-security/secure-repo
   contents: read
