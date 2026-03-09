@@ -41,8 +41,11 @@ jobs:
           # Then run createrepo on each arch
           # Then sign metadata
           for ARCH in "${ARCHS[@]}"; do
-            mkdir -p $ARCH
+            mkdir -p ${ARCH}
             mv ../incoming/*${ARCH}.rpm ${ARCH}/ || true
+            # Prune older packages, keeping only the 4 most recent
+            # ls -v sorts by version, head -n -4 selects all but the last 4
+            ls -v ${ARCH}/noports-*.${ARCH}.rpm 2>/dev/null | head -n -4 | xargs -r rm
             createrepo_c --update ${ARCH}
             gpg --detach-sign --armor --batch --yes "${ARCH}/repodata/repomd.xml"
           done
